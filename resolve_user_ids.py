@@ -1,22 +1,18 @@
-import os
 import tweepy
-
-API_KEY = os.getenv("API_KEY")
-API_SECRET = os.getenv("API_SECRET")
+import os
+import time
 
 client = tweepy.Client(bearer_token=os.getenv("BEARER_TOKEN"))
 
-usernames = []
-with open("usernames.txt", "r") as f:
-    usernames = [line.strip() for line in f if line.strip()]
-
-user_ids = []
-for username in usernames:
-    user = client.get_user(username=username)
-    if user.data:
-        uid = user.data.id
-        print(f"{username} => {uid}")
-        user_ids.append(str(uid))
-
+usernames = open("usernames.txt").read().splitlines()
 with open("user_ids.txt", "w") as f:
-    f.write("\n".join(user_ids))
+    for username in usernames:
+        try:
+            user = client.get_user(username=username)
+            user_id = user.data.id
+            print(f"{username} => {user_id}")
+            f.write(str(user_id) + "\n")
+            time.sleep(2)  # wait 2 seconds between requests
+        except Exception as e:
+            print(f"❌ Failed to get {username}: {e}")
+            time.sleep(5)
